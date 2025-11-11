@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8" />
+    <title>Admin panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            background: #f4f7fa;
+            margin: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        .header-bar {
+            width: 100%;
+            background: #23272b;
+            color: #fff;
+            padding: 0.25rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-bar span {
+            font-weight: 600;
+        }
+        .logout-link {
+            color: #aaa !important;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: color 0.2s;
+        }
+        .logout-link:hover {
+            color: #fff !important;
+        }
+        .main-section {
+            display: flex;
+            margin-top: 0;
+        }
+        .sidebar {
+            background: #fff;
+            border-right: 1px solid #e3e6f0;
+            width: 220px;
+            min-height: 100vh;
+            padding-top: 1.5rem;
+            border-radius: 8px;
+            margin-left: 1rem;
+        }
+        .sidebar .nav-link {
+            display: block;
+            color: #23272b;
+            background: none;
+            border: none;
+            border-radius: 0;
+            text-align: left;
+            margin-bottom: 8px;
+            padding: 0.75rem 1.25rem;
+            font-weight: 500;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.15s;
+            border-radius: 6px;
+        }
+        .sidebar .nav-link.active,
+        .sidebar .nav-link:hover {
+            background: #0d6efd;
+            color: #fff;
+        }
+        .content-block {
+            flex: 1;
+            padding: 2.5rem 2rem 2rem 2rem;
+        }
+        .content-block h1 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: #23272b;
+            font-weight: 500;
+        }
+        ul.nav-tabs {
+            margin-bottom: 0;
+            position: relative;
+            border-bottom: none;
+        }
+        ul.nav-tabs::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0px;
+            right: 0px;
+            border-bottom: 1px solid #dee2e6;
+            pointer-events: none;
+        }
+        .table-container {
+            background: #fff;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 0.125rem 0.25rem rgb(58 59 69 / 10%);
+            padding-top: 0;
+            margin-top: 12px;
+            position: relative;
+            overflow: hidden;
+            border-top: 1px solid #dee2e6;
+        }
+        .all-users-header {
+            background-color: #f8f9fa;
+            padding: 10px 20px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+            border-top: 1px solid #dee2e6;
+            border-bottom: 1px solid #dee2e6;
+            position: relative;
+            left: 20px;
+            right: 20px;
+        }
+        .table-responsive {
+            margin-top: 0;
+            padding: 0 20px 20px 20px;
+            border-radius: 0 0 8px 8px;
+        }
+        .table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+            background: #fff;
+            border-radius: 0 0 8px 8px;
+            box-shadow: none;
+            border: none;
+        }
+        thead tr {
+            background-color: #fff;
+        }
+        thead th {
+            border-bottom: 1px solid #dee2e6;
+            font-weight: 600;
+            padding: 0.75rem 1rem;
+            vertical-align: middle;
+        }
+        tbody tr:nth-child(odd) {
+            background-color: #f8f9fa;
+        }
+        tbody td {
+            padding: 0.75rem 1rem;
+            vertical-align: middle;
+            font-size: 1rem;
+            border: none !important;
+        }
+        .btn {
+            font-size: 0.95rem;
+            padding: 0.38rem 1.1rem;
+        }
+        .btn-primary {
+            background: #0d6efd;
+            border: none;
+        }
+        .btn-danger {
+            background: #dc3545;
+            border: none;
+        }
+        select.form-select[multiple] {
+            min-height: 70px;
+        }
+        select.form-select[multiple][readonly] {
+            background-color: #e9ecef;
+            pointer-events: none;
+        }
+        @media (max-width: 900px) {
+            .main-section {
+                flex-direction: column;
+            }
+            .sidebar {
+                min-height: 0;
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #e3e6f0;
+                margin-left: 0;
+                border-radius: 0;
+            }
+            .content-block {
+                padding: 1.1rem 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header-bar">
+    <span>
+      <span th:text="${user.email}">admin@mail.ru</span>
+      with roles:
+      <span th:each="role,stat : ${user.roles}" th:text="${#strings.replace(role.authority,'ROLE_','')} + (${!stat.last ? ', ' : ''})">ADMIN USER</span>
+    </span>
+    <a th:href="@{/logout}" class="logout-link">Logout</a>
+</div>
+
+<div class="main-section">
+
+    <div class="sidebar">
+        <a th:href="@{/admin}" class="nav-link" th:classappend="${#httpServletRequest.requestURI.contains('/admin') and !#httpServletRequest.requestURI.contains('/admin/user')} ? 'active' : ''" sec:authorize="hasRole('ADMIN')">Admin</a>
+        <a th:href="@{/admin/user}" class="nav-link" th:classappend="${#httpServletRequest.requestURI.contains('/admin/user')} ? 'active' : ''" sec:authorize="isAuthenticated()">User</a>
+    </div>
+
+    <div class="content-block">
+        <h1>Admin panel</h1>
+        <ul class="nav nav-tabs">
+            <li class="nav-item"><span class="nav-link active">Users table</span></li>
+            <li class="nav-item"><a th:href="@{/admin/addNewUser}" class="nav-link">New User</a></li>
+        </ul>
+
+        <div class="table-container">
+            <div class="all-users-header">All users</div>
+
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Age</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+                    </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="editForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editUserModalLabel">Edit User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editUserId" name="id">
+                    <div class="mb-3">
+                        <label for="editFirstName" class="form-label">First Name</label>
+                        <input type="text" class="form-control" id="editFirstName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editLastName" class="form-label">Last Name</label>
+                        <input type="text" class="form-control" id="editLastName" name="surname" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editAge" class="form-label">Age</label>
+                        <input type="number" class="form-control" id="editAge" name="age" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="editEmail" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editPassword" class="form-label">Password (leave blank to keep current)</label>
+                        <input type="password" class="form-control" id="editPassword" name="password">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editRoles" class="form-label">Roles</label>
+                        <select class="form-select" id="editRoles" name="role" multiple size="2">
+                            <option value="ROLE_ADMIN">ADMIN</option>
+                            <option value="ROLE_USER">USER</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="deleteForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteUserModalLabel">Delete User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="deleteUserId" name="id">
+                    <label for="deleteUserIdShow" class="form-label">ID</label>
+                    <input type="text" class="form-control" id="deleteUserIdShow" readonly>
+                    <label for="deleteFirstName" class="form-label mt-3">First name</label>
+                    <input type="text" class="form-control" id="deleteFirstName" readonly>
+                    <label for="deleteLastName" class="form-label mt-3">Last name</label>
+                    <input type="text" class="form-control" id="deleteLastName" readonly>
+                    <label for="deleteAge" class="form-label mt-3">Age</label>
+                    <input type="number" class="form-control" id="deleteAge" readonly>
+                    <label for="deleteEmail" class="form-label mt-3">Email</label>
+                    <input type="email" class="form-control" id="deleteEmail" readonly>
+                    <div class="mb-3">
+                        <label for="deleteRoles" class="form-label">Roles</label>
+                        <select class="form-select" id="deleteRoles" multiple size="2" readonly>
+                            <option value="ROLE_ADMIN">ADMIN</option>
+                            <option value="ROLE_USER">USER</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadUsers();
+
+        const editForm = document.getElementById('editForm');
+        editForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userId = document.getElementById('editUserId').value;
+            const formData = new FormData(editForm);
+            const roles = Array.from(document.getElementById('editRoles').selectedOptions)
+                .map(option => ({ authority: option.value }));
+            const user = {
+                id: userId,
+                name: formData.get('name'),
+                surname: formData.get('surname'),
+                age: +formData.get('age'),
+                email: formData.get('email'),
+                password: formData.get('password') || null,
+                roles: roles
+            };
+
+            try {
+                const response = await fetch(`/api/admin/users/${userId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(user)
+                });
+                if (response.ok) {
+                    loadUsers();
+                    bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
+                }
+            } catch (error) {
+            }
+        });
+
+        const deleteForm = document.getElementById('deleteForm');
+        deleteForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userId = document.getElementById('deleteUserId').value;
+            try {
+                const response = await fetch(`/api/admin/users/${userId}`, { method: 'DELETE' });
+                if (response.ok) {
+                    loadUsers();
+                    bootstrap.Modal.getInstance(document.getElementById('deleteUserModal')).hide();
+                }
+            } catch (error) {
+            }
+        });
+    });
+
+    async function loadUsers() {
+        try {
+            const response = await fetch('/api/admin/users');
+            const users = await response.json();
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+            users.forEach(user => {
+                const rolesString = user.roles.map(r => r.authority.replace('ROLE_', '')).join(', ');
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${user.id}</td>
+                    <td>${user.name}</td>
+                    <td>${user.surname}</td>
+                    <td>${user.age}</td>
+                    <td>${user.email}</td>
+                    <td>${rolesString}</td>
+                    <td>
+                      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editUserModal"
+                        data-id="${user.id}" data-name="${user.name}" data-surname="${user.surname}"
+                        data-age="${user.age}" data-email="${user.email}"
+                        data-roles="${user.roles.map(r => r.authority).join(',')}">Edit</button>
+                    </td>
+                    <td>
+                      <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteUserModal"
+                        data-id="${user.id}" data-name="${user.name}" data-surname="${user.surname}"
+                        data-age="${user.age}" data-email="${user.email}"
+                        data-roles="${user.roles.map(r => r.authority).join(',')}">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } catch (error) {
+        }
+    }
+
+
+    const editUserModal = document.getElementById('editUserModal');
+    if (editUserModal) {
+        editUserModal.addEventListener('show.bs.modal', event => {
+            const button = event.relatedTarget;
+
+            document.getElementById('editUserId').value = button.getAttribute('data-id');
+            document.getElementById('editFirstName').value = button.getAttribute('data-name');
+            document.getElementById('editLastName').value = button.getAttribute('data-surname');
+            document.getElementById('editAge').value = button.getAttribute('data-age');
+            document.getElementById('editEmail').value = button.getAttribute('data-email');
+            document.getElementById('editPassword').value = '';
+
+            const rolesValue = button.getAttribute('data-roles');
+            const rolesArray = rolesValue ? rolesValue.split(',') : [];
+
+            const rolesSelect = document.getElementById('editRoles');
+            if (rolesSelect) {
+                for (let i = 0; i < rolesSelect.options.length; i++) {
+                    rolesSelect.options[i].selected = false;
+                }
+                rolesArray.forEach(role => {
+                    for (let i = 0; i < rolesSelect.options.length; i++) {
+                        if (rolesSelect.options[i].value === role) {
+                            rolesSelect.options[i].selected = true;
+                            break;
+                        }
+                    }
+                });
+            }
+
+            const form = document.getElementById('editForm');
+            if (form) {
+                form.action = '/admin/edit/' + button.getAttribute('data-id');
+            }
+        });
+    }
+
+    const deleteUserModal = document.getElementById('deleteUserModal');
+    if (deleteUserModal) {
+        deleteUserModal.addEventListener('show.bs.modal', event => {
+            const button = event.relatedTarget;
+
+            document.getElementById('deleteUserId').value = button.getAttribute('data-id');
+            document.getElementById('deleteUserIdShow').value = button.getAttribute('data-id');
+            document.getElementById('deleteFirstName').value = button.getAttribute('data-name');
+            document.getElementById('deleteLastName').value = button.getAttribute('data-surname');
+            document.getElementById('deleteAge').value = button.getAttribute('data-age');
+            document.getElementById('deleteEmail').value = button.getAttribute('data-email');
+
+            const rolesValue = button.getAttribute('data-roles');
+            const rolesArray = rolesValue ? rolesValue.split(',') : [];
+
+            const deleteRolesSelect = document.getElementById('deleteRoles');
+            if (deleteRolesSelect) {
+                for (let i = 0; i < deleteRolesSelect.options.length; i++) {
+                    deleteRolesSelect.options[i].selected = false;
+                }
+                rolesArray.forEach(role => {
+                    for (let i = 0; i < deleteRolesSelect.options.length; i++) {
+                        if (deleteRolesSelect.options[i].value === role) {
+                            deleteRolesSelect.options[i].selected = true;
+                            break;
+                        }
+                    }
+                });
+            }
+
+            const form = document.getElementById('deleteForm');
+            if (form) {
+                form.action = '/admin/delete/' + button.getAttribute('data-id');
+            }
+        });
+    }
+</script>
+<script src="/js/app.js" defer></script>
+
+</body>
+</html>
