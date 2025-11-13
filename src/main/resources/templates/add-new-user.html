@@ -217,6 +217,7 @@
         const addUserForm = document.getElementById('addUserForm');
         addUserForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+
             const formData = new FormData(addUserForm);
             const roles = Array.from(document.getElementById('roleSelect').selectedOptions)
                 .map(option => ({ authority: option.value }));
@@ -228,15 +229,13 @@
                 password: formData.get('password'),
                 roles: roles
             };
+
             try {
                 const response = await fetch('/api/admin/users', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(user)
                 });
-                if (response.ok) {
-                    addUserForm.reset();
-                }
             } catch (error) {
             }
         });

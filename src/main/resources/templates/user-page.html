@@ -160,22 +160,8 @@
 
 <div class="main-section">
     <div class="sidebar">
-
-
-        <a th:href="@{/admin}"
-           class="nav-link"
-           sec:authorize="hasRole('ADMIN')"
-           th:classappend="${#httpServletRequest.requestURI.contains('/admin') and !#httpServletRequest.requestURI.contains('/admin/user') and !#httpServletRequest.requestURI.contains('/user')} ? ' active' : ''">
-            Admin
-        </a>
-
-        <a th:href="@{/admin/user}"
-           class="nav-link"
-           sec:authorize="hasRole('ADMIN') or hasRole('USER')"
-           th:classappend="${#httpServletRequest.requestURI.contains('/admin/user') or #httpServletRequest.requestURI.contains('/user')} ? ' active' : ''">
-            User
-        </a>
-
+        <a href="#" class="nav-link" id="adminTab" sec:authorize="hasRole('ADMIN')">Admin</a>
+        <a href="#" class="nav-link active" id="userTab" sec:authorize="hasRole('ADMIN') or hasRole('USER')">User</a>
     </div>
 
     <div class="content-block">
@@ -193,9 +179,7 @@
                     <th>Role</th>
                 </tr>
                 </thead>
-                <tbody id="userInfoBody">
-
-                </tbody>
+                <tbody id="userInfoBody"></tbody>
             </table>
         </div>
     </div>
@@ -205,6 +189,27 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', async () => {
+        await loadUserData();
+
+
+        const adminTab = document.getElementById('adminTab');
+        const userTab = document.getElementById('userTab');
+
+        if (adminTab) {
+            adminTab.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.location.href = '/admin';
+            });
+        }
+
+        if (userTab) {
+            userTab.addEventListener('click', (e) => {
+                e.preventDefault();
+            });
+        }
+    });
+
+    async function loadUserData() {
         try {
             const response = await fetch('/api/user');
             if (!response.ok) throw new Error('Failed to fetch user data');
@@ -224,7 +229,7 @@
             tbody.appendChild(tr);
         } catch (error) {
         }
-    });
+    }
 </script>
 
 </body>

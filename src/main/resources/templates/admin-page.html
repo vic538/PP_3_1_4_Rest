@@ -162,6 +162,63 @@
             background-color: #e9ecef;
             pointer-events: none;
         }
+        .form-wrap-center {
+            background: #fff;
+            margin: 0 auto;
+            border-radius: 3px;
+            padding: 22px 20px 28px 20px;
+            border: 1px solid #e3e6f0;
+            max-width: 700px;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 6px;
+            margin-left: 3px;
+        }
+        .form-control {
+            height: 38px;
+            font-size: 1.08rem;
+            margin-bottom: 0;
+            background: #fff;
+            transition: background 0.2s;
+            border: 1px solid #cfd8dc;
+            border-radius: 3px;
+        }
+        .form-control:focus {
+            background: #fffde0;
+            box-shadow: none;
+            outline: none;
+        }
+        .form-control.bg-yellow {
+            background: #fff7bf !important;
+        }
+        select.form-control {
+            min-height: 60px;
+        }
+        .btn-success {
+            padding: 8px 40px;
+            font-size: 1.15rem;
+            font-weight: 500;
+            border-radius: 5px;
+            margin-top: 12px;
+            margin-bottom: 2px;
+        }
+        .centered-form-controls {
+            width: 320px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .tab-pane-title {
+            font-size: 1.18rem;
+            font-weight: 500;
+            color: #23272b;
+            margin-bottom: 1.2rem;
+        }
         @media (max-width: 900px) {
             .main-section {
                 flex-direction: column;
@@ -176,6 +233,11 @@
             }
             .content-block {
                 padding: 1.1rem 0.5rem;
+            }
+            .form-wrap-center, .centered-form-controls {
+                width: 100%;
+                min-width: unset;
+                padding: 10px;
             }
         }
     </style>
@@ -194,43 +256,84 @@
 <div class="main-section">
 
     <div class="sidebar">
-        <a th:href="@{/admin}" class="nav-link" th:classappend="${#httpServletRequest.requestURI.contains('/admin') and !#httpServletRequest.requestURI.contains('/admin/user')} ? 'active' : ''" sec:authorize="hasRole('ADMIN')">Admin</a>
-        <a th:href="@{/admin/user}" class="nav-link" th:classappend="${#httpServletRequest.requestURI.contains('/admin/user')} ? 'active' : ''" sec:authorize="isAuthenticated()">User</a>
+        <a href="#" class="nav-link active" id="adminTab" sec:authorize="hasRole('ADMIN')">Admin</a>
+        <a href="#" class="nav-link" id="userTab" sec:authorize="isAuthenticated()">User</a>
     </div>
 
     <div class="content-block">
         <h1>Admin panel</h1>
         <ul class="nav nav-tabs">
-            <li class="nav-item"><span class="nav-link active">Users table</span></li>
-            <li class="nav-item"><a th:href="@{/admin/addNewUser}" class="nav-link">New User</a></li>
+            <li class="nav-item">
+                <a href="#" class="nav-link active" id="usersTableTab">Users table</a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" id="newUserTab">New User</a>
+            </li>
         </ul>
 
-        <div class="table-container">
-            <div class="all-users-header">All users</div>
+        <div id="usersTableContent">
+            <div class="table-container">
+                <div class="all-users-header">All users</div>
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Age</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Edit</th>
+                            <th>Delete</th>
+                        </tr>
+                        </thead>
+                        <tbody id="usersTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
-            <div class="table-responsive">
-                <table class="table table-striped align-middle">
-                    <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>First Name</th>
-                        <th>Last Name</th>
-                        <th>Age</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Edit</th>
-                        <th>Delete</th>
-                    </tr>
-                    </thead>
-                    <tbody id="usersTableBody">
-
-                    </tbody>
-                </table>
+        <div id="newUserContent" style="display: none;">
+            <div class="tab-pane-title">Add new user</div>
+            <div class="form-wrap-center">
+                <form id="addUserForm">
+                    <input type="hidden" id="userId" name="id"/>
+                    <div class="centered-form-controls">
+                        <div class="form-group">
+                            <label for="nameInput" class="form-label">First name</label>
+                            <input id="nameInput" type="text" class="form-control bg-yellow" name="name" placeholder="First name" required/>
+                        </div>
+                        <div class="form-group">
+                            <label for="surnameInput" class="form-label">Last name</label>
+                            <input id="surnameInput" type="text" class="form-control bg-yellow" name="surname" placeholder="Last name" required/>
+                        </div>
+                        <div class="form-group">
+                            <label for="ageInput" class="form-label">Age</label>
+                            <input id="ageInput" type="number" class="form-control" name="age" placeholder="Age" required min="1" max="120"/>
+                        </div>
+                        <div class="form-group">
+                            <label for="emailInput" class="form-label">Email</label>
+                            <input id="emailInput" type="email" class="form-control bg-yellow" name="email" placeholder="Email" required/>
+                        </div>
+                        <div class="form-group">
+                            <label for="passwordInput" class="form-label">Password</label>
+                            <input id="passwordInput" type="password" class="form-control" name="password" placeholder="Password" required/>
+                        </div>
+                        <div class="form-group">
+                            <label for="roleSelect" class="form-label">Roles</label>
+                            <select id="roleSelect" class="form-control" name="roles" multiple required>
+                                <option value="ROLE_ADMIN">ADMIN</option>
+                                <option value="ROLE_USER">USER</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-success">Add new user</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
-
 
 <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -279,7 +382,6 @@
     </div>
 </div>
 
-
 <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -319,8 +421,78 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-
     document.addEventListener('DOMContentLoaded', () => {
+        // Навигация в сайдбаре
+        const adminTab = document.getElementById('adminTab');
+        const userTab = document.getElementById('userTab');
+
+        if (adminTab) {
+            adminTab.addEventListener('click', (e) => {
+                e.preventDefault();
+                // Уже на странице Admin, ничего не делаем
+            });
+        }
+
+        if (userTab) {
+            userTab.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.location.href = '/admin/user';
+            });
+        }
+
+        // Внутренние вкладки Admin panel
+        const usersTableTab = document.getElementById('usersTableTab');
+        const newUserTab = document.getElementById('newUserTab');
+        const usersTableContent = document.getElementById('usersTableContent');
+        const newUserContent = document.getElementById('newUserContent');
+
+        function switchTab(activeTab, activeContent, inactiveTab, inactiveContent) {
+            activeTab.classList.add('active');
+            inactiveTab.classList.remove('active');
+            activeContent.style.display = 'block';
+            inactiveContent.style.display = 'none';
+        }
+
+        usersTableTab.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchTab(usersTableTab, usersTableContent, newUserTab, newUserContent);
+            loadUsers();
+        });
+
+        newUserTab.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchTab(newUserTab, newUserContent, usersTableTab, usersTableContent);
+        });
+
+        usersTableContent.style.display = 'block';
+        newUserContent.style.display = 'none';
+
+        const addUserForm = document.getElementById('addUserForm');
+        addUserForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(addUserForm);
+            const roles = Array.from(document.getElementById('roleSelect').selectedOptions)
+                .map(option => ({ authority: option.value }));
+            const user = {
+                name: formData.get('name'),
+                surname: formData.get('surname'),
+                age: +formData.get('age'),
+                email: formData.get('email'),
+                password: formData.get('password'),
+                roles: roles
+            };
+
+            try {
+                const response = await fetch('/api/admin/users', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(user)
+                });
+            } catch (error) {
+            }
+        });
+
         loadUsers();
 
         const editForm = document.getElementById('editForm');
@@ -379,31 +551,30 @@
                 const rolesString = user.roles.map(r => r.authority.replace('ROLE_', '')).join(', ');
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${user.id}</td>
-                    <td>${user.name}</td>
-                    <td>${user.surname}</td>
-                    <td>${user.age}</td>
-                    <td>${user.email}</td>
-                    <td>${rolesString}</td>
-                    <td>
-                      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editUserModal"
-                        data-id="${user.id}" data-name="${user.name}" data-surname="${user.surname}"
-                        data-age="${user.age}" data-email="${user.email}"
-                        data-roles="${user.roles.map(r => r.authority).join(',')}">Edit</button>
-                    </td>
-                    <td>
-                      <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteUserModal"
-                        data-id="${user.id}" data-name="${user.name}" data-surname="${user.surname}"
-                        data-age="${user.age}" data-email="${user.email}"
-                        data-roles="${user.roles.map(r => r.authority).join(',')}">Delete</button>
-                    </td>
-                `;
+                <td>${user.id}</td>
+                <td>${user.name}</td>
+                <td>${user.surname}</td>
+                <td>${user.age}</td>
+                <td>${user.email}</td>
+                <td>${rolesString}</td>
+                <td>
+                  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editUserModal"
+                    data-id="${user.id}" data-name="${user.name}" data-surname="${user.surname}"
+                    data-age="${user.age}" data-email="${user.email}"
+                    data-roles="${user.roles.map(r => r.authority).join(',')}">Edit</button>
+                </td>
+                <td>
+                  <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteUserModal"
+                    data-id="${user.id}" data-name="${user.name}" data-surname="${user.surname}"
+                    data-age="${user.age}" data-email="${user.email}"
+                    data-roles="${user.roles.map(r => r.authority).join(',')}">Delete</button>
+                </td>
+            `;
                 tbody.appendChild(tr);
             });
         } catch (error) {
         }
     }
-
 
     const editUserModal = document.getElementById('editUserModal');
     if (editUserModal) {

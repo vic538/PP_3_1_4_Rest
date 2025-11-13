@@ -16,11 +16,9 @@ import java.util.stream.Collectors;
 public class MyUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
 
-    public MyUserDetailsService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public MyUserDetailsService(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
