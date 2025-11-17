@@ -211,7 +211,7 @@
 
     async function loadUserData() {
         try {
-            const response = await fetch('/api/user');
+            const response = await fetch('/user/api');
             if (!response.ok) throw new Error('Failed to fetch user data');
             const user = await response.json();
             const tbody = document.getElementById('userInfoBody');

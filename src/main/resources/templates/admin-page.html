@@ -422,14 +422,13 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // Навигация в сайдбаре
+
         const adminTab = document.getElementById('adminTab');
         const userTab = document.getElementById('userTab');
 
         if (adminTab) {
             adminTab.addEventListener('click', (e) => {
                 e.preventDefault();
-                // Уже на странице Admin, ничего не делаем
             });
         }
 
@@ -440,7 +439,6 @@
             });
         }
 
-        // Внутренние вкладки Admin panel
         const usersTableTab = document.getElementById('usersTableTab');
         const newUserTab = document.getElementById('newUserTab');
         const usersTableContent = document.getElementById('usersTableContent');
@@ -484,7 +482,7 @@
             };
 
             try {
-                const response = await fetch('/api/admin/users', {
+                const response = await fetch('/admin/api/users', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(user)
@@ -513,7 +511,7 @@
             };
 
             try {
-                const response = await fetch(`/api/admin/users/${userId}`, {
+                const response = await fetch(`/admin/api/users/${userId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(user)
@@ -531,7 +529,7 @@
             e.preventDefault();
             const userId = document.getElementById('deleteUserId').value;
             try {
-                const response = await fetch(`/api/admin/users/${userId}`, { method: 'DELETE' });
+                const response = await fetch(`/admin/api/users/${userId}`, { method: 'DELETE' });
                 if (response.ok) {
                     loadUsers();
                     bootstrap.Modal.getInstance(document.getElementById('deleteUserModal')).hide();
@@ -543,7 +541,7 @@
 
     async function loadUsers() {
         try {
-            const response = await fetch('/api/admin/users');
+            const response = await fetch('/admin/api/users');
             const users = await response.json();
             const tbody = document.getElementById('usersTableBody');
             tbody.innerHTML = '';

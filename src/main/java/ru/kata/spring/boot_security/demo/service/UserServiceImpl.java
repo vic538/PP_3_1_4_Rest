@@ -11,6 +11,7 @@ import ru.kata.spring.boot_security.demo.entity.User;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -62,7 +63,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void saveUserWithRole(User user, List<String> rolesStr) {
+    public void saveUserWithRole(User user) {
+        List<String> rolesStr = user.getRoles().stream()
+                .map(Role::getAuthority)
+                .collect(Collectors.toList());
+
         if (user.getId() == null || user.getId() == 0) {
 
             List<Role> roles = processRoles(rolesStr);
@@ -105,9 +110,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUserWithRoles(int id, User user, List<String> rolesStr) {
+    public void updateUserWithRoles(int id, User user) {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+        List<String> rolesStr = user.getRoles().stream()
+                .map(Role::getAuthority)
+                .collect(Collectors.toList());
 
         existingUser.setName(user.getName());
         existingUser.setSurname(user.getSurname());
