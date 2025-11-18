@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="ru">
 <head>
     <meta charset="UTF-8" />
     <title>Admin panel</title>
@@ -245,19 +244,15 @@
 <body>
 
 <div class="header-bar">
-    <span>
-      <span th:text="${user.email}">admin@mail.ru</span>
-      with roles:
-      <span th:each="role,stat : ${user.roles}" th:text="${#strings.replace(role.authority,'ROLE_','')} + (${!stat.last ? ', ' : ''})">ADMIN USER</span>
-    </span>
-    <a th:href="@{/logout}" class="logout-link">Logout</a>
+    <span id="userInfo">Loading user data...</span>
+    <a href="/logout" class="logout-link">Logout</a>
 </div>
 
 <div class="main-section">
 
     <div class="sidebar">
-        <a href="#" class="nav-link active" id="adminTab" sec:authorize="hasRole('ADMIN')">Admin</a>
-        <a href="#" class="nav-link" id="userTab" sec:authorize="isAuthenticated()">User</a>
+        <a href="#" class="nav-link active" id="adminTab">Admin</a>
+        <a href="#" class="nav-link" id="userTab">User</a>
     </div>
 
     <div class="content-block">
@@ -421,7 +416,21 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    async function loadCurrentUser() {
+        try {
+            const response = await fetch('/admin/api/user');
+            const user = await response.json();
+            const rolesString = user.roles.map(role =>
+                role.authority.replace('ROLE_', '')
+            ).join(', ');
+            document.getElementById('userInfo').innerHTML = `${user.email} with roles: ${rolesString}`;
+        } catch (error) {
+            console.error('Error loading user:', error);
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
+        loadCurrentUser();
 
         const adminTab = document.getElementById('adminTab');
         const userTab = document.getElementById('userTab');
@@ -435,7 +444,7 @@
         if (userTab) {
             userTab.addEventListener('click', (e) => {
                 e.preventDefault();
-                window.location.href = '/admin/user';
+                window.location.href = '/user';
             });
         }
 
@@ -487,7 +496,13 @@
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(user)
                 });
+                if (response.ok) {
+                    addUserForm.reset();
+                    switchTab(usersTableTab, usersTableContent, newUserTab, newUserContent);
+                    loadUsers();
+                }
             } catch (error) {
+                console.error('Error adding user:', error);
             }
         });
 
@@ -521,6 +536,7 @@
                     bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
                 }
             } catch (error) {
+                console.error('Error updating user:', error);
             }
         });
 
@@ -535,6 +551,7 @@
                     bootstrap.Modal.getInstance(document.getElementById('deleteUserModal')).hide();
                 }
             } catch (error) {
+                console.error('Error deleting user:', error);
             }
         });
     });
@@ -571,6 +588,7 @@
                 tbody.appendChild(tr);
             });
         } catch (error) {
+            console.error('Error loading users:', error);
         }
     }
 
@@ -603,11 +621,6 @@
                     }
                 });
             }
-
-            const form = document.getElementById('editForm');
-            if (form) {
-                form.action = '/admin/edit/' + button.getAttribute('data-id');
-            }
         });
     }
 
@@ -639,11 +652,6 @@
                         }
                     }
                 });
-            }
-
-            const form = document.getElementById('deleteForm');
-            if (form) {
-                form.action = '/admin/delete/' + button.getAttribute('data-id');
             }
         });
     }
